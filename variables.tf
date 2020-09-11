@@ -79,3 +79,15 @@ variable "ext_dns" {
 	description = "List of dns-servers"
 	default = ["8.8.8.8"]
 }
+
+variable "router_name" {
+	type = string
+	description = "Name of the public router to connect the ext_subnet to"
+}
+
+variable "use_floatingip" {
+	type = bool
+	default = false
+	description = "No floatingip will be addressed if this variable is false(default: false)"
+}
+

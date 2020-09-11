@@ -5,6 +5,7 @@ could be useful if a custom firewall-virtualmachine is needed.
 
 # Configuration
 
+
 ```
 terraform {
     source = "/home/hw/Projekte/Anomalie/Testbed/terragrunt/modules/openstack-networks/"
@@ -19,6 +20,7 @@ inputs = {
     ext_subnet = "testsubnet"
     extnet = "testnet"
     sshkey = "testbed-key"
+    use_floatingip = true
     networks = {
         local = {
                 network = "local",
