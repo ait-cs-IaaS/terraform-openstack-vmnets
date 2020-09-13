@@ -59,12 +59,12 @@ module "host" {
 }
 
 resource "openstack_networking_floatingip_v2" "floatip_1" {
-	count = var.use_floatingip ? 1 : 0
-	pool = "provider-aecid-208"
+	count = var.floating_ip_pool != null  ? 1 : 0
+	pool = var.floating_ip_pool
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_1" {
-	count = var.use_floatingip ? 1 : 0
+	count = var.floating_ip_pool != null ? 1 : 0
 	floating_ip = openstack_networking_floatingip_v2.floatip_1[0].address
 	instance_id = module.host.server.id
 	depends_on = [module.host]

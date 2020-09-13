@@ -85,9 +85,9 @@ variable "router_name" {
 	description = "Name of the public router to connect the ext_subnet to"
 }
 
-variable "use_floatingip" {
-	type = bool
-	default = false
-	description = "No floatingip will be addressed if this variable is false(default: false)"
+variable "floating_ip_pool" {
+	type = string
+	description = "The floating ip pool to use, if not set no floating ip will be assigned to the router host"
+	default = null
 }
 
