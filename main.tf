@@ -1,7 +1,7 @@
 
-# terraform {
-#   backend "consul" {}
-# }
+terraform {
+  backend "consul" {}
+}
 
 data "openstack_networking_router_v2" "publicrouter" {
   count = var.extnet_create ? 1 : 0
