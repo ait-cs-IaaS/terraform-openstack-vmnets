@@ -19,6 +19,7 @@ inputs = {
     host_userdata = "test.yml"
     ext_subnet = "testsubnet"
     extnet = "testnet"
+    extnet_create = true
     sshkey = "testbed-key"
     use_floatingip = true
     networks = {

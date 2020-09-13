@@ -60,29 +60,36 @@ variable "sshkey" {
 
 variable "extnet" {
 	type = string
-	description = "Name of the network to connect the host to"
+	description = "Name or id of the network to connect the host to (if extnet_create=true always assumed to be name)"
 }
 
 variable "ext_subnet" {
 	type = string
-	description = "Name of the subnet to connect the host to"
+	description = "Name or id of the subnet to connect the host to (if extnet_create=true always assumed to be name)"
+}
+
+variable "extnet_create" {
+	type = bool
+	description = "Flag determining if extnet is created or pre-existing network is used (true -> create, false -> use existing)"
+	default = false
 }
 
 variable "ext_cidr" {
 	type = string
-	description = "CIDR of the subnet to connect the host to"
-        default = "192.168.201.0/24"
+	description = "CIDR of the subnet to connect the host to (only needed if extnet_create=true)"
+	default = "192.168.201.0/24"
 }
 
 variable "ext_dns" {
 	type = list(string)
-	description = "List of dns-servers"
+	description = "List of dns-servers (only needed if extnet_create=true)"
 	default = ["8.8.8.8"]
 }
 
 variable "router_name" {
 	type = string
-	description = "Name of the public router to connect the ext_subnet to"
+	description = "Name of the public router to connect the ext_subnet to (only needed if extnet_create=true)"
+	default = null
 }
 
 variable "floating_ip_pool" {
