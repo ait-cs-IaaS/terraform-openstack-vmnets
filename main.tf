@@ -63,7 +63,6 @@ module "host" {
       host_address_index = network.host_address_index
     }
   }
-  depends_on = [ openstack_networking_network_v2.net, openstack_networking_subnet_v2.subnet, openstack_networking_network_v2.extnet, openstack_networking_subnet_v2.extsubnet ]
 }
 
 resource "openstack_networking_floatingip_v2" "floatip_1" {
@@ -75,5 +74,4 @@ resource "openstack_compute_floatingip_associate_v2" "fip_1" {
 	count = var.floating_ip_pool != null ? 1 : 0
 	floating_ip = openstack_networking_floatingip_v2.floatip_1[0].address
 	instance_id = module.host.server.id
-	depends_on = [module.host]
 }
