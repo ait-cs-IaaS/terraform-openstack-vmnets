@@ -4,26 +4,29 @@ terraform {
 }
 
 data "openstack_networking_router_v2" "publicrouter" {
+  count = var.extnet_create ? 1 : 0
   name = var.router_name
 }
 
-
 resource "openstack_networking_network_v2" "extnet" {
+  count = var.extnet_create ? 1 : 0
   name           = var.extnet
   admin_state_up = "true"
 }
 
 resource "openstack_networking_subnet_v2" "extsubnet" {
+  count = var.extnet_create ? 1 : 0
   name       = var.ext_subnet
-  network_id = openstack_networking_network_v2.extnet.id
+  network_id = openstack_networking_network_v2.extnet[0].id
   cidr       = var.ext_cidr
   dns_nameservers = var.ext_dns
   ip_version = 4
 }
 
 resource "openstack_networking_router_interface_v2" "router_interface" {
-  router_id = data.openstack_networking_router_v2.publicrouter.id
-  subnet_id = openstack_networking_subnet_v2.extsubnet.id
+  count = var.extnet_create ? 1 : 0
+  router_id = data.openstack_networking_router_v2.publicrouter[0].id
+  subnet_id = openstack_networking_subnet_v2.extsubnet[0].id
 }
 
 resource "openstack_networking_network_v2" "net" {
@@ -51,21 +54,24 @@ module "host" {
   image = var.host_image
   flavor = var.host_flavor
   sshkey = var.sshkey
-  network = var.extnet
-  subnet = var.ext_subnet
+  network = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
+  subnet = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
   userdatafile = var.host_userdata
-  additional_networks = var.networks
-  depends_on = [ openstack_networking_network_v2.net, openstack_networking_subnet_v2.subnet, openstack_networking_network_v2.extnet, openstack_networking_subnet_v2.extsubnet ]
+  additional_networks = { for key, network in var.networks : key => {
+      network = openstack_networking_network_v2.net[key].id
+      subnet = openstack_networking_subnet_v2.subnet[key].id
+      host_address_index = network.host_address_index
+    }
+  }
 }
 
 resource "openstack_networking_floatingip_v2" "floatip_1" {
-	count = var.use_floatingip ? 1 : 0
-	pool = "provider-aecid-208"
+	count = var.floating_ip_pool != null  ? 1 : 0
+	pool = var.floating_ip_pool
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_1" {
-	count = var.use_floatingip ? 1 : 0
+	count = var.floating_ip_pool != null ? 1 : 0
 	floating_ip = openstack_networking_floatingip_v2.floatip_1[0].address
 	instance_id = module.host.server.id
-	depends_on = [module.host]
 }
