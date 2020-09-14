@@ -57,7 +57,12 @@ module "host" {
   network = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
   subnet = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
   userdatafile = var.host_userdata
-  additional_networks = var.networks
+  additional_networks = { for key, network in var.networks : key => {
+      network = openstack_networking_network_v2.net[key].id
+      subnet = openstack_networking_subnet_v2.subnet[key].id
+      host_address_index = network.host_address_index
+    }
+  }
   depends_on = [ openstack_networking_network_v2.net, openstack_networking_subnet_v2.subnet, openstack_networking_network_v2.extnet, openstack_networking_subnet_v2.extsubnet ]
 }
 

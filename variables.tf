@@ -1,7 +1,7 @@
 variable "networks" {
 	type = map(
 		object({
-                        network = string
+			network = string
 			subnet = string
 			cidr = string
 			dns = list(string)
