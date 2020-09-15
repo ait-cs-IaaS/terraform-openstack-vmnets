@@ -41,7 +41,9 @@ resource "openstack_networking_subnet_v2" "subnet" {
   name       = each.value.subnet
   network_id = openstack_networking_network_v2.net[each.key].id
   cidr       = each.value.cidr
-  dns_nameservers = each.value.dns
+  # require host_address_index if dns option is true 
+  # then concat expected IP address with either supplied list or empty list (coalesce takes first not null/empty value)
+  dns_nameservers = each.value.host_address_index != null && each.value.host_as_dns ? concat([cidrhost(each.value.cidr, each.value.host_address_index)], coalesce(each.value.dns, [])) : each.value.dns
   ip_version = 4
 }
 

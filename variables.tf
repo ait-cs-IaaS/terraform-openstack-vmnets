@@ -6,8 +6,10 @@ variable "networks" {
 			cidr = string
 			dns = list(string)
 			host_address_index = number
+			host_as_dns = bool
 		})
 	)
+	description = "map of internal networks to be created. (Note that if host_as_dns is true host_address_index must not be null)"
 }
 
 variable "host_name" {

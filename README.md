@@ -28,14 +28,16 @@ inputs = {
                 host_address_index = "1",
                 subnet = "local-subnet",
                 cidr = "172.16.0.0/24",
-                dns: ["8.8.8.8"]
+                dns = ["8.8.8.8"],
+                host_as_dns = false
         }
         dmz = {
                 network = "dmz",
                 host_address_index = "1",
                 subnet = "dmz-subnet"
-                cidr = "172.16.100.0/24"
-                dns: ["8.8.8.8"]
+                cidr = "172.16.100.0/24",
+                dns = ["8.8.8.8"]
+                host_as_dns = false
         }
     }
 }
