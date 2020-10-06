@@ -55,6 +55,7 @@ module "host" {
   host_address_index = var.host_ext_address_index
   image              = var.host_image
   flavor             = var.host_flavor
+  volume_size        = var.host_size
   sshkey             = var.sshkey
   network            = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
   subnet             = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet

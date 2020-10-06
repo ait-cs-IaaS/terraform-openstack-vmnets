@@ -5,6 +5,7 @@
 - *Breaking Change* Rename external network ip variable
 - Make external network ip input optional
 - Make userdata optional and upgrade host module to 1.3.2
+- *Bug fix* Fix host_size not being passed as volume_size
 
 ## v1.3
 - Add firewall and networks as outputs
