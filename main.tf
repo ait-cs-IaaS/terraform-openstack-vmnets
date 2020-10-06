@@ -49,7 +49,7 @@ resource "openstack_networking_subnet_v2" "subnet" {
 
 
 module "host" {
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.2"
   hostname           = var.host_name
   tag                = var.host_tag
   host_address_index = var.host_ext_address_index

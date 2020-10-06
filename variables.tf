@@ -37,6 +37,7 @@ variable "host_image" {
 variable "host_userdata" {
   type        = string
   description = "Userdata for the virtual machine"
+  default     = null
 }
 
 variable "host_flavor" {

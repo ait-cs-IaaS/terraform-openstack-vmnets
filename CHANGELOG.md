@@ -4,6 +4,7 @@
 
 - *Breaking Change* Rename external network ip variable
 - Make external network ip input optional
+- Make userdata optional and upgrade host module to 1.3.2
 
 ## v1.3
 - Add firewall and networks as outputs
