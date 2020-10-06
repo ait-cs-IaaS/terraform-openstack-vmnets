@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.4
+
+- *Breaking Change* Rename external network ip variable
+- Make external network ip input optional
+- Make userdata optional and upgrade host module to 1.3.2
+
 ## v1.3
 - Add firewall and networks as outputs
 - Add option to use firewall as dns server for internal nets (can be configured per network and fixed ip must also be supplied)

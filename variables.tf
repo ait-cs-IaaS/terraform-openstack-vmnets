@@ -22,9 +22,11 @@ variable "host_tag" {
   description = "Tag for the virtual machine"
 }
 
-variable "host_ext_ip" {
+variable "host_ext_address_index" {
   type        = number
-  description = "External IP  for the virtual machine. This must be an ip from the extnet"
+  description = "External IP address index for the host"
+  default     = null
+
 }
 
 variable "host_image" {
@@ -35,6 +37,7 @@ variable "host_image" {
 variable "host_userdata" {
   type        = string
   description = "Userdata for the virtual machine"
+  default     = null
 }
 
 variable "host_flavor" {
