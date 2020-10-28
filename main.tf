@@ -3,6 +3,29 @@ terraform {
   backend "consul" {}
 }
 
+locals {
+  # convert host routes into a flat list
+  # we need to do this since we have multiple networks with possibly multiple routes
+  # and terraform only supports one level for count/for_each
+  host_routes = flatten([
+    for net, conf in var.networks : [
+      for route in(conf.routes != null ? conf.routes : []) : {
+        # the per network route index to get a stable resource naming
+        # to avoid unecessary changes when for example a single route is removed
+        "${conf.network}-${index(conf.routes, route)}" = {
+          key  = net
+          cidr = route.cidr
+          gw   = route.gw
+        }
+      }
+  ]])
+
+  # colapse the list of maps into a single map so we can use for_each
+  host_routes_merged = {
+    for host_route in local.host_routes : keys(host_route)[0] => values(host_route)[0]
+  }
+}
+
 data "openstack_networking_router_v2" "publicrouter" {
   count = var.extnet_create ? 1 : 0
   name  = var.router_name
@@ -21,6 +44,14 @@ resource "openstack_networking_subnet_v2" "extsubnet" {
   cidr            = var.ext_cidr
   dns_nameservers = var.ext_dns
   ip_version      = 4
+}
+
+
+resource "openstack_networking_subnet_route_v2" "ext_route" {
+  count            = length(var.ext_routes)
+  subnet_id        = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+  destination_cidr = var.ext_routes[count.index].cidr
+  next_hop         = var.ext_routes[count.index].gw
 }
 
 resource "openstack_networking_router_interface_v2" "router_interface" {
@@ -47,6 +78,12 @@ resource "openstack_networking_subnet_v2" "subnet" {
   ip_version      = 4
 }
 
+resource "openstack_networking_subnet_route_v2" "route" {
+  for_each         = local.host_routes_merged
+  subnet_id        = openstack_networking_subnet_v2.subnet[each.value.key].id
+  destination_cidr = each.value.cidr
+  next_hop         = each.value.gw
+}
 
 module "host" {
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.2"
