@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5
+
+- *Breaking Change* Add optional routes configuration to networks (key: `routes`) 
+- Add optional routes configuration for the external network 
+
 ## v1.4
 
 - *Breaking Change* Rename external network ip variable

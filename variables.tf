@@ -7,6 +7,12 @@ variable "networks" {
       dns                = list(string)
       host_address_index = number
       host_as_dns        = bool
+      routes = list(object(
+        {
+          cidr = string
+          gw   = string
+        }
+      ))
     })
   )
   description = "map of internal networks to be created. (Note that if host_as_dns is true host_address_index must not be null)"
@@ -89,6 +95,17 @@ variable "ext_dns" {
   type        = list(string)
   description = "List of dns-servers (only needed if extnet_create=true)"
   default     = ["8.8.8.8"]
+}
+
+variable "ext_routes" {
+  type = list(object(
+    {
+      cidr = string
+      gw   = string
+    }
+  ))
+  description = "List of host routes to add to the external network. Note that to use this extsubnet must be an ID if extnet_create is not set!"
+  default     = []
 }
 
 variable "router_name" {
