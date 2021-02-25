@@ -54,8 +54,14 @@ variable "host_flavor" {
 
 variable "host_size" {
   type        = number
-  description = "Disksize in gb of the virtual machine"
+  description = "Disksize in gb of the virtual machine (only relavant is host_use_volume=true)"
   default     = 5
+}
+
+variable "host_use_volume" {
+  type        = bool
+  description = "If the compute node use a volume or a root file"
+  default     = false
 }
 
 variable "host_delete_on_termination" {

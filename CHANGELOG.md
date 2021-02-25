@@ -1,5 +1,10 @@
 # Changelog
 
+# v1.5.1
+
+ - Use host module version 1.4
+ - Make storage type configurable (`host_use_volume`, `true`=volume and `false`=root file)
+
 ## v1.5
 
 - *Breaking Change* Add optional routes configuration to networks (key: `routes`) 
