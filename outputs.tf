@@ -1,5 +1,6 @@
 output "firewall" {
-  value = module.host.server
+  value     = module.host.server
+  sensitive = true
 }
 
 output "extnet" {
