@@ -13,6 +13,12 @@ variable "networks" {
           gw   = string
         }
       ))
+      fw_routes = list(object(
+        {
+          cidr = string
+          gw   = string
+        }
+      ))
     })
   )
   description = "map of internal networks to be created. (Note that if host_as_dns is true host_address_index must not be null)"
@@ -43,6 +49,12 @@ variable "host_image" {
 variable "host_userdata" {
   type        = string
   description = "Userdata for the virtual machine"
+  default     = null
+}
+
+variable "host_userdata_vars" {
+  type        = any
+  description = "Userdata vars for the virtual machine"
   default     = null
 }
 
@@ -103,6 +115,12 @@ variable "ext_dns" {
   default     = ["8.8.8.8"]
 }
 
+variable "ext_gateway_index" {
+  type        = number
+  description = "The host index for the external networks default gateway (only used if extnet_create=true)"
+  default     = null
+}
+
 variable "ext_routes" {
   type = list(object(
     {
@@ -111,6 +129,17 @@ variable "ext_routes" {
     }
   ))
   description = "List of host routes to add to the external network. Note that to use this extsubnet must be an ID if extnet_create is not set!"
+  default     = []
+}
+
+variable "ext_fw_routes" {
+  type = list(object(
+    {
+      cidr = string
+      gw   = string
+    }
+  ))
+  description = "List of routes to use on the external network interface of the fw host!"
   default     = []
 }
 

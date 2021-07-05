@@ -1,5 +1,14 @@
 # Changelog
 
+
+# v1.5.3
+ - Add userdata vars variable input for host
+ - Update to use host module 1.4.2
+ - Add option to supply routes to be used by the fw host only
+ - Add networking info to userdata vars
+
+# v1.5.2
+ - Add sensitive flag to host output
 # v1.5.1
 
  - Use host module version 1.4
