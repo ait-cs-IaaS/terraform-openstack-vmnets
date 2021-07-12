@@ -1,6 +1,9 @@
 # Changelog
 
 
+# v1.5.4
+ - Move to github
+ - Add support for host metadata
 # v1.5.3
  - Add userdata vars variable input for host
  - Update to use host module 1.4.2
