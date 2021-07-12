@@ -34,11 +34,16 @@ variable "host_tag" {
   description = "Tag for the virtual machine"
 }
 
+variable "host_metadata" {
+  type        = map(string)
+  description = "The metadata values to assign to the instance"
+  default     = {}
+}
+
 variable "host_ext_address_index" {
   type        = number
   description = "External IP address index for the host"
   default     = null
-
 }
 
 variable "host_image" {
