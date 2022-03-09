@@ -72,7 +72,7 @@ resource "openstack_networking_subnet_v2" "subnet" {
   network_id = openstack_networking_network_v2.net[each.key].id
   cidr       = each.value.cidr
   gateway_ip = each.value.host_address_index != null ? cidrhost(each.value.cidr, each.value.host_address_index) : null
-  # require host_address_index if dns option is true 
+  # require host_address_index if dns option is true
   # then concat expected IP address with either supplied list or empty list (coalesce takes first not null/empty value)
   dns_nameservers = each.value.host_address_index != null && each.value.host_as_dns ? concat([cidrhost(each.value.cidr, each.value.host_address_index)], coalesce(each.value.dns, [])) : each.value.dns
   ip_version      = 4
@@ -130,7 +130,7 @@ locals {
 }
 
 module "host" {
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.4"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.5.0"
   hostname           = var.host_name
   tag                = var.host_tag
   metadata           = var.host_metadata
@@ -144,9 +144,10 @@ module "host" {
   subnet             = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
   userdatafile       = var.host_userdata
   userdata_vars      = var.host_userdata_vars != null ? merge(local.network_userdata, var.host_userdata_vars) : local.network_userdata
-  additional_networks = { for key, network in var.networks : key => {
+  networks = { for key, network in var.networks : key => {
     network            = openstack_networking_network_v2.net[key].id
     subnet             = openstack_networking_subnet_v2.subnet[key].id
+    access             = network.access
     host_address_index = network.host_address_index
     }
   }
