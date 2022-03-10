@@ -109,6 +109,12 @@ variable "extnet_create" {
   default     = false
 }
 
+variable "extnet_access" {
+  type        = bool
+  description = "If the extnet should be the access_network"
+  default     = false
+}
+
 variable "ext_cidr" {
   type        = string
   description = "CIDR of the subnet to connect the host to (only needed if extnet_create=true)"

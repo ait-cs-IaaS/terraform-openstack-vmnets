@@ -151,6 +151,7 @@ module "host" {
   sshkey             = var.sshkey
   network            = local.host_network
   subnet             = local.host_subnet
+  network_access     = var.extnet_access
   extnet             = !var.extnet_create
   userdatafile       = var.host_userdata
   userdata_vars      = var.host_userdata_vars != null ? merge(local.network_userdata, var.host_userdata_vars) : local.network_userdata
