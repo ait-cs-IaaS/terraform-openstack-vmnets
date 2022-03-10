@@ -127,6 +127,24 @@ locals {
       for key, network in var.networks : openstack_networking_network_v2.net[key].id => key
     }
   }
+  host_network = var.dynamic_host_net ? null : (var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet)
+  host_subnet  = var.dynamic_host_net ? null : (var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet)
+  ext_hostnet = {
+    "extnet" = {
+      network            = local.host_network
+      subnet             = local.host_subnet
+      access             = true
+      host_address_index = network.host_address_index
+    }
+  }
+  __networks = { for key, network in var.networks : key => {
+    network            = openstack_networking_network_v2.net[key].id
+    subnet             = openstack_networking_subnet_v2.subnet[key].id
+    access             = network.access
+    host_address_index = network.host_address_index
+    }
+  }
+  host_networks = var.dynamic_host_net ? merge(local.__networks, local.ext_hostnet) : local.__networks
 }
 
 module "host" {
@@ -140,17 +158,11 @@ module "host" {
   volume_size        = var.host_size
   use_volume         = var.host_use_volume
   sshkey             = var.sshkey
-  network            = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
-  subnet             = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+  network            = local.host_network
+  subnet             = local.host_subnet
   userdatafile       = var.host_userdata
   userdata_vars      = var.host_userdata_vars != null ? merge(local.network_userdata, var.host_userdata_vars) : local.network_userdata
-  networks = { for key, network in var.networks : key => {
-    network            = openstack_networking_network_v2.net[key].id
-    subnet             = openstack_networking_subnet_v2.subnet[key].id
-    access             = network.access
-    host_address_index = network.host_address_index
-    }
-  }
+  networks           = local.host_networks
 }
 
 resource "openstack_networking_floatingip_v2" "floatip_1" {

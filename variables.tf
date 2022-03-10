@@ -160,3 +160,9 @@ variable "floating_ip_pool" {
   description = "The floating ip pool to use, if not set no floating ip will be assigned to the router host"
   default     = null
 }
+
+variable "dynamic_host_net" {
+  type        = bool
+  description = "If host resource should use dynamic network"
+  default     = true
+}
