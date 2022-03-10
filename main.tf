@@ -131,8 +131,8 @@ locals {
   host_subnet  = var.dynamic_host_net ? null : (var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet)
   ext_hostnet = {
     "extnet" = {
-      network            = local.host_network
-      subnet             = local.host_subnet
+      network            = local.network_userdata.external_network_id
+      subnet             = local.network_userdata.external_subnet_id
       access             = true
       host_address_index = var.host_ext_address_index
     }
