@@ -134,7 +134,7 @@ locals {
       network            = local.host_network
       subnet             = local.host_subnet
       access             = true
-      host_address_index = network.host_address_index
+      host_address_index = var.host_ext_address_index
     }
   }
   __networks = { for key, network in var.networks : key => {
