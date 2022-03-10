@@ -1,6 +1,7 @@
 variable "networks" {
   type = map(
     object({
+      access             = bool
       network            = string
       subnet             = string
       cidr               = string
@@ -159,4 +160,3 @@ variable "floating_ip_pool" {
   description = "The floating ip pool to use, if not set no floating ip will be assigned to the router host"
   default     = null
 }
-
