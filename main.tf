@@ -127,24 +127,15 @@ locals {
       for key, network in var.networks : openstack_networking_network_v2.net[key].id => key
     }
   }
-  host_network = var.dynamic_host_net ? null : (var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet)
-  host_subnet  = var.dynamic_host_net ? null : (var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet)
-  ext_hostnet = {
-    "extnet" = {
-      network            = local.network_userdata.external_network_id
-      subnet             = local.network_userdata.external_subnet_id
-      access             = true
-      host_address_index = var.host_ext_address_index
-    }
-  }
-  __networks = { for key, network in var.networks : key => {
+  host_network = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
+  host_subnet  = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+  host_networks = { for key, network in var.networks : key => {
     network            = openstack_networking_network_v2.net[key].id
     subnet             = openstack_networking_subnet_v2.subnet[key].id
     access             = network.access
     host_address_index = network.host_address_index
     }
   }
-  host_networks = var.dynamic_host_net ? merge(local.__networks, local.ext_hostnet) : local.__networks
 }
 
 module "host" {
@@ -160,6 +151,7 @@ module "host" {
   sshkey             = var.sshkey
   network            = local.host_network
   subnet             = local.host_subnet
+  extnet             = !var.extnet_create
   userdatafile       = var.host_userdata
   userdata_vars      = var.host_userdata_vars != null ? merge(local.network_userdata, var.host_userdata_vars) : local.network_userdata
   networks           = local.host_networks
