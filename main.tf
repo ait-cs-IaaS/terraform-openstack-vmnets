@@ -139,7 +139,7 @@ locals {
 }
 
 module "host" {
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=dev"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.5.1"
   hostname           = var.host_name
   tag                = var.host_tag
   metadata           = var.host_metadata
