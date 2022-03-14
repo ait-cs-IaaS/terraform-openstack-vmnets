@@ -109,10 +109,21 @@ variable "extnet_create" {
   default     = false
 }
 
+variable "router_create" {
+  type        = bool
+  description = "Flag determining if router is created or pre-existing router is used (true -> create, false -> use existing)"
+  default     = false
+}
+
 variable "extnet_access" {
   type        = bool
   description = "If the extnet should be the access_network"
   default     = false
+}
+
+variable "provider_net_uuid" {
+  type        = string
+  description = "UUID of the provider network"
 }
 
 variable "ext_cidr" {

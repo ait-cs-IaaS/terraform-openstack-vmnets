@@ -27,8 +27,15 @@ locals {
 }
 
 data "openstack_networking_router_v2" "publicrouter" {
-  count = var.extnet_create ? 1 : 0
+  count = var.router_create ? 0 : 1
   name  = var.router_name
+}
+
+resource "openstack_networking_router_v2" "provider_router" {
+  count               = var.router_create ? 1 : 0
+  name                = var.router_name
+  admin_state_up      = true
+  external_network_id = var.provider_net_uuid
 }
 
 resource "openstack_networking_network_v2" "extnet" {
@@ -55,7 +62,7 @@ resource "openstack_networking_subnet_route_v2" "ext_route" {
 
 resource "openstack_networking_router_interface_v2" "router_interface" {
   count     = var.extnet_create ? 1 : 0
-  router_id = data.openstack_networking_router_v2.publicrouter[0].id
+  router_id = var.router_create ? openstack_networking_router_v2.publicrouter[0].id : data.openstack_networking_router_v2.publicrouter[0].id
   subnet_id = openstack_networking_subnet_v2.extsubnet[0].id
 }
 
