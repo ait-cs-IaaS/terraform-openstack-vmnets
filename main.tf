@@ -62,7 +62,7 @@ resource "openstack_networking_subnet_route_v2" "ext_route" {
 
 resource "openstack_networking_router_interface_v2" "router_interface" {
   count     = var.extnet_create ? 1 : 0
-  router_id = var.router_create ? openstack_networking_router_v2.publicrouter[0].id : data.openstack_networking_router_v2.publicrouter[0].id
+  router_id = var.router_create ? openstack_networking_router_v2.provider_router[0].id : data.openstack_networking_router_v2.publicrouter[0].id
   subnet_id = openstack_networking_subnet_v2.extsubnet[0].id
 }
 
