@@ -49,10 +49,10 @@ resource "openstack_networking_subnet_v2" "extsubnet" {
   name            = var.ext_subnet
   network_id      = openstack_networking_network_v2.extnet[0].id
   cidr            = var.ext_cidr
-  gateway_ip      = var.ext_gateway_index != null ? cidrhost(var.ext_cidr, var.ext_gateway_index) : null
   dns_nameservers = var.ext_dns
   ip_version      = 4
 }
+
 resource "openstack_networking_subnet_route_v2" "ext_route" {
   count            = length(var.ext_routes)
   subnet_id        = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
