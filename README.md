@@ -3,10 +3,9 @@
 This module creates an "external" network and multiple "internal" networks with a virtual machine in between. This
 could be useful if a custom firewall-virtualmachine is needed.
 
-# Configuration
+## Configuration
 
-
-```
+```terraform
 terraform {
   source = "git@github.com:ait-cs-IaaS/terraform-openstack-vmnets.git"
 }
@@ -39,6 +38,7 @@ inputs = {
     }
     dmz = {
       network = "dmz",
+      access = true,
       host_address_index = "1",
       subnet = "dmz-subnet"
       cidr = "172.16.100.0/24",

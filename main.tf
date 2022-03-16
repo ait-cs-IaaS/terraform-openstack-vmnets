@@ -27,8 +27,15 @@ locals {
 }
 
 data "openstack_networking_router_v2" "publicrouter" {
-  count = var.extnet_create ? 1 : 0
+  count = var.router_create ? 0 : 1
   name  = var.router_name
+}
+
+resource "openstack_networking_router_v2" "provider_router" {
+  count               = var.router_create ? 1 : 0
+  name                = var.router_name
+  admin_state_up      = true
+  external_network_id = var.provider_net_uuid
 }
 
 resource "openstack_networking_network_v2" "extnet" {
@@ -42,10 +49,10 @@ resource "openstack_networking_subnet_v2" "extsubnet" {
   name            = var.ext_subnet
   network_id      = openstack_networking_network_v2.extnet[0].id
   cidr            = var.ext_cidr
-  gateway_ip      = var.ext_gateway_index != null ? cidrhost(var.ext_cidr, var.ext_gateway_index) : null
   dns_nameservers = var.ext_dns
   ip_version      = 4
 }
+
 resource "openstack_networking_subnet_route_v2" "ext_route" {
   count            = length(var.ext_routes)
   subnet_id        = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
@@ -55,7 +62,7 @@ resource "openstack_networking_subnet_route_v2" "ext_route" {
 
 resource "openstack_networking_router_interface_v2" "router_interface" {
   count     = var.extnet_create ? 1 : 0
-  router_id = data.openstack_networking_router_v2.publicrouter[0].id
+  router_id = var.router_create ? openstack_networking_router_v2.provider_router[0].id : data.openstack_networking_router_v2.publicrouter[0].id
   subnet_id = openstack_networking_subnet_v2.extsubnet[0].id
 }
 
@@ -72,7 +79,7 @@ resource "openstack_networking_subnet_v2" "subnet" {
   network_id = openstack_networking_network_v2.net[each.key].id
   cidr       = each.value.cidr
   gateway_ip = each.value.host_address_index != null ? cidrhost(each.value.cidr, each.value.host_address_index) : null
-  # require host_address_index if dns option is true 
+  # require host_address_index if dns option is true
   # then concat expected IP address with either supplied list or empty list (coalesce takes first not null/empty value)
   dns_nameservers = each.value.host_address_index != null && each.value.host_as_dns ? concat([cidrhost(each.value.cidr, each.value.host_address_index)], coalesce(each.value.dns, [])) : each.value.dns
   ip_version      = 4
@@ -127,10 +134,19 @@ locals {
       for key, network in var.networks : openstack_networking_network_v2.net[key].id => key
     }
   }
+  host_network = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
+  host_subnet  = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+  host_networks = { for key, network in var.networks : key => {
+    network            = openstack_networking_network_v2.net[key].id
+    subnet             = openstack_networking_subnet_v2.subnet[key].id
+    access             = network.access
+    host_address_index = network.host_address_index
+    }
+  }
 }
 
 module "host" {
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.4"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.5.1"
   hostname           = var.host_name
   tag                = var.host_tag
   metadata           = var.host_metadata
@@ -140,16 +156,13 @@ module "host" {
   volume_size        = var.host_size
   use_volume         = var.host_use_volume
   sshkey             = var.sshkey
-  network            = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
-  subnet             = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+  network            = local.host_network
+  subnet             = local.host_subnet
+  network_access     = var.extnet_access
+  extnet             = !var.extnet_create
   userdatafile       = var.host_userdata
   userdata_vars      = var.host_userdata_vars != null ? merge(local.network_userdata, var.host_userdata_vars) : local.network_userdata
-  additional_networks = { for key, network in var.networks : key => {
-    network            = openstack_networking_network_v2.net[key].id
-    subnet             = openstack_networking_subnet_v2.subnet[key].id
-    host_address_index = network.host_address_index
-    }
-  }
+  networks           = local.host_networks
 }
 
 resource "openstack_networking_floatingip_v2" "floatip_1" {

@@ -1,6 +1,7 @@
 variable "networks" {
   type = map(
     object({
+      access             = bool
       network            = string
       subnet             = string
       cidr               = string
@@ -108,6 +109,24 @@ variable "extnet_create" {
   default     = false
 }
 
+variable "router_create" {
+  type        = bool
+  description = "Flag determining if router is created or pre-existing router is used (true -> create, false -> use existing)"
+  default     = false
+}
+
+variable "extnet_access" {
+  type        = bool
+  description = "If the extnet should be the access_network"
+  default     = false
+}
+
+variable "provider_net_uuid" {
+  type        = string
+  description = "UUID of the provider network"
+  default     = null
+}
+
 variable "ext_cidr" {
   type        = string
   description = "CIDR of the subnet to connect the host to (only needed if extnet_create=true)"
@@ -159,4 +178,3 @@ variable "floating_ip_pool" {
   description = "The floating ip pool to use, if not set no floating ip will be assigned to the router host"
   default     = null
 }
-
