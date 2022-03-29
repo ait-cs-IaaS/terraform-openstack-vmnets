@@ -5,8 +5,8 @@ output "firewall" {
 
 output "extnet" {
   value = {
-    network = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
-    subnet  = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+    network = var.extnet
+    subnet  = var.ext_subnet
   }
 }
 

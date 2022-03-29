@@ -134,8 +134,10 @@ locals {
       for key, network in var.networks : openstack_networking_network_v2.net[key].id => key
     }
   }
-  host_network = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : var.extnet
-  host_subnet  = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : var.ext_subnet
+  host_network       = var.extnet_create ? openstack_networking_network_v2.extnet[0].id : data.openstack_networking_network_v2.extnet[0].id
+  host_subnet        = var.extnet_create ? openstack_networking_subnet_v2.extsubnet[0].id : data.openstack_networking_subnet_v2.extsubnet[0].id
+  host_address_index = var.extnet_create ? null : var.host_ext_address_index
+  network_access     = var.extnet_create ? null : var.extnet_access
   host_networks = { for key, network in var.networks : key => {
     network            = openstack_networking_network_v2.net[key].id
     subnet             = openstack_networking_subnet_v2.subnet[key].id
@@ -146,20 +148,20 @@ locals {
 }
 
 module "host" {
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.5.1"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.5.2"
   hostname           = var.host_name
   tag                = var.host_tag
   metadata           = var.host_metadata
-  host_address_index = var.host_ext_address_index
   image              = var.host_image
   flavor             = var.host_flavor
   volume_size        = var.host_size
   use_volume         = var.host_use_volume
   sshkey             = var.sshkey
+  host_address_index = local.host_address_index
   network            = local.host_network
   subnet             = local.host_subnet
-  network_access     = var.extnet_access
-  extnet             = !var.extnet_create
+  network_access     = local.network_access
+  extnet             = false
   userdatafile       = var.host_userdata
   userdata_vars      = var.host_userdata_vars != null ? merge(local.network_userdata, var.host_userdata_vars) : local.network_userdata
   networks           = local.host_networks
