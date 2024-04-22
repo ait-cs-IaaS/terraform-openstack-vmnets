@@ -1,0 +1,102 @@
+#cloud-config
+# use for linux based firewalls to provide initial routing
+system_info:
+  default_user:
+    system: true
+    name: ait
+    plain_text_passwd: test
+    lock_passwd: False
+
+write_files: 
+-  content: |
+    #!/usr/bin/env python3
+
+    import json
+    import subprocess
+    import sys
+    from ipaddress import ip_network
+    from urllib.request import urlopen
+
+    import netifaces
+    import yaml
+
+    NETWORK_METADATA = "http://169.254.169.254/openstack/2018-08-27/network_data.json"
+
+
+    def add_main_interface_config(ethernets, interface, mac):
+        ethernets[interface] = {"dhcp4": True, "dhcp4-overrides": {"use-domains": False}, "match": {"macaddress": mac}}
+
+
+    def add_extra_interface_config(ethernets, interface, mac, network):
+        ethernets[interface] = {
+            "dhcp4": False,
+            "match": {"macaddress": mac},
+            "addresses": [f"{network['ip']}/{ip_network(network['cidr']).prefixlen}"],
+            "routes": [
+                {"to": route["cidr"], "via": route["gw"]} for route in network["routes"]
+            ]
+            if network["routes"] is not None
+            else [],
+            "nameservers": {
+                "addresses": network["dns"] if network["dns"] is not None else [],
+            },
+        }
+
+
+    def make_netplan(external_network, networks, network_ids):
+
+        network_data = json.loads(urlopen(NETWORK_METADATA).read())
+        tap_macs = {
+            entry["id"]: entry["ethernet_mac_address"] for entry in network_data["links"]
+        }
+        network_macs = {
+            entry["network_id"]: tap_macs[entry["link"]]
+            for entry in network_data["networks"]
+        }
+        mac_interfaces = {
+            netifaces.ifaddresses(inf)[netifaces.AF_LINK][0]["addr"]: inf
+            for inf in netifaces.interfaces()
+        }
+        main_mac = network_macs[external_network["id"]]
+        main_interface = mac_interfaces[main_mac]
+
+        ethernets = {}
+        add_main_interface_config(ethernets, main_interface, main_mac)
+        for id_, network in network_ids.items():
+            mac = network_macs[id_]
+            interface = mac_interfaces[mac]
+            add_extra_interface_config(ethernets, interface, mac, networks[network])
+
+        return {"network": {"ethernets": ethernets, "version": 2}}
+
+
+    if __name__ == "__main__":
+        extnet_id = "${external_network_id}"
+        ext_subnet_id = "${external_subnet_id}"
+        extnet = json.loads('${jsonencode(external_network)}')
+        networks = json.loads('${jsonencode(networks)}')
+        network_ids = json.loads('${jsonencode(network_ids)}')
+        extnet["id"] = extnet_id
+        extnet["subnet_id"] = ext_subnet_id
+        netplan_cfg = "/etc/netplan/50-cloud-init.yaml"
+        netplan = make_netplan(extnet, networks, network_ids)
+
+        with open(netplan_cfg, "w") as netplan_file:
+            yaml.safe_dump(netplan, stream=netplan_file, default_flow_style=False)
+
+        result = subprocess.run(["/usr/sbin/netplan", "apply"])
+        print(f"Netplan configuration exited with {result.returncode}")
+        exit(result.returncode)
+
+   owner: root:root     
+   path: /root/ifsetup.py
+   permissions: '0700'
+
+runcmd:
+  - [chown, -R, ait, /home/ait]
+  - [chgrp, -R, ait, /home/ait]
+  - [userdel, -r, ubuntu]
+  - [ /root/ifsetup.py ]
+  - "echo 1 > /proc/sys/net/ipv4/ip_forward"
+  - [iptables, -P, FORWARD, ACCEPT]
+  - [iptables, -t, nat, -A, POSTROUTING, -o, ens3, -j, MASQUERADE]
