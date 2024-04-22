@@ -43,8 +43,3 @@ resource "openstack_networking_subnet_route_v2" "subnet_route" {
   destination_cidr = var.destinations[count.index]
   next_hop         = cidrhost(var.parent_cidr, var.firewall_host_index)
 }
-
-# return the local value with information about created networks
-output networks {
-    value = local.networks
-}
