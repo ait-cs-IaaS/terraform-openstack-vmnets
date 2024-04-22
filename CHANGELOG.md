@@ -1,5 +1,7 @@
 # Changelog
 
+# v2.0.0
+ - Fundamentally change the code to remove complexity and adapt the code to meet the new requirements.
 
 # v1.5.4
  - Move to github
