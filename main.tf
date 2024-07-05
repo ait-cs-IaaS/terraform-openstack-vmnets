@@ -49,7 +49,16 @@ locals {
         }
       }
 
-  routes_flatten = distinct(flatten([for network in values(var.child_networks) : network.destinations if network.destinations != null]))
+  routes_flatten = flatten([
+    for key, network in module.networks : [
+      var.child_networks[key].destinations != null ? [ for destination in var.child_networks[key].destinations : {
+        cidr = destination
+        gw = cidrhost(network.network_cidr, 254)
+        subnet_id = network.subnet_id
+      } ] : []
+    ]
+  ])
+
 }
 
 # Create the server between the networks, that acts as router and firewall.
@@ -70,13 +79,10 @@ module "firewall" {
     additional_networks = local.networks
 }
 
-locals {
-}
-
 #Create the routes --> define that the next from the base net to the other nets is over the firewall created before.
 resource "openstack_networking_subnet_route_v2" "subnet_route" {
     count            = length(local.routes_flatten)
-    subnet_id        = var.parent_subnet_id
-    destination_cidr = local.routes_flatten[count.index]
-    next_hop         = cidrhost(var.parent_cidr, var.firewall_host_index)
+    subnet_id        = local.routes_flatten[count.index].subnet_id
+    destination_cidr = local.routes_flatten[count.index].cidr
+    next_hop         = local.routes_flatten[count.index].gw
 }
